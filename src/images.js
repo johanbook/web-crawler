@@ -25,9 +25,7 @@ async function fetchAndSaveImage(url, options) {
 
   /* eslint-disable-next-line no-console */
   console.log(
-    chalk`{green \t\u2714 }{gray Saving} {green ${
-      url.host + url.pathname
-    }} {gray as} {green ${name}}`
+    chalk`{green \t\u2714 }{gray Saving} {green ${url.host + url.pathname}}`
   );
   fs.writeFileSync(`${options.outputDir}/${name}`, buffer);
 }

@@ -56,14 +56,19 @@ async function crawl(stringUrl, origin, options) {
     origin = url.origin;
   }
 
+  /* eslint-disable no-console */
+  console.info(
+    chalk`{blue \u1433} {gray Crawling} {green ${url.host + url.pathname}}`
+  );
+
   const resp = await fetch(url);
   const html = await resp.text();
 
   const domOptions = {};
   if (options.executeJs) domOptions.runScripts = "dangerously";
   const dom = new JSDOM(html, domOptions);
-  extractImages(dom, origin, options);
   crawlLinks(dom, origin, options);
+  extractImages(dom, origin, options);
 }
 
 module.exports = function setup(url, options) {
@@ -75,5 +80,12 @@ module.exports = function setup(url, options) {
     );
     process.exit(1);
   }
+  if (!url.includes("https")) {
+    url = "https://" + url;
+  }
+
   crawl(url, undefined, options);
+
+  /* eslint-disable no-console */
+  console.info(chalk`{green \u2714} {gray Crawl completed}`);
 };
