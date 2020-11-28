@@ -4,5 +4,6 @@ module.exports = {
   rules: {
     "no-console": "error",
     "no-template-curly-in-string": "error",
+    "unicorn/no-process-exit": "off",
   },
 };

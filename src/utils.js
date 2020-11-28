@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const chalk = require("chalk");
 const fetch = require("node-fetch");
 const fs = require("fs");
@@ -12,11 +10,10 @@ function createImageName(url) {
 }
 
 async function fetchAndSaveImage(url, options) {
-  const resp = await fetch(url).catch(() => {
-    /* eslint-disable-next-line no-console */
-    console.error(chalk.red(`Could not fetch ${url}`));
-  });
+  const resp = await fetch(url).catch(() => {});
   if (!resp.ok) {
+    /* eslint-disable-next-line no-console */
+    console.error(chalk.red(`Failed to download ${url}`));
     return;
   }
 

@@ -1,45 +1,38 @@
-#!/usr/bin/env node
-
 const chalk = require("chalk");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const { JSDOM } = require("jsdom");
-const { Command } = require("commander");
 
-const imageTools = require("./images");
+const utils = require("./utils");
 
 const seenImages = new Set();
 const seenPages = new Set();
 
 /* Extract and save images from dom */
 function extractImages(dom, origin, options) {
-  const images = dom.window.document.querySelectorAll("img");
-  images.forEach((image) => {
-    const url = image.src;
-    if (!url || seenImages.has(url)) {
-      return;
-    } else {
+  dom.window.document.querySelectorAll("img").forEach(({ src }) => {
+    if (src && !seenImages.has(src)) {
       seenImages.add(url);
+      utils.fetchAndSaveImage(new URL(src, origin), options);
     }
-    imageTools.fetchAndSaveImage(new URL(url, origin), options);
   });
+}
+
+function shouldCrawlUrl(url, referrer, mode) {
+  if (!url) return false;
+  if (mode === "all") return true;
+  if (mode === "origin") return url.origin === referrer.origin;
+  if (mode === "pathname")
+    return url.origin === referrer.origin && url.pathname === referrer.pathname;
 }
 
 /* Find links in dom and crawl each of them */
 function crawlLinks(dom, origin, options) {
-  const links = dom.window.document.querySelectorAll("a");
-  links.forEach((link) => {
-    const stringUrl = link.href;
-    if (!stringUrl || seenPages.has(stringUrl)) {
-      return;
+  dom.window.document.querySelectorAll("a").forEach(({ href }) => {
+    const url = new URL(href, origin);
+    if (shouldCrawlUrl(url, origin, options.mode)) {
+      crawl(url, origin, options);
     }
-
-    const url = new URL(stringUrl, origin);
-    if (url.origin !== origin) {
-      return;
-    }
-
-    crawl(url, origin, options);
   });
 }
 
@@ -52,9 +45,7 @@ async function crawl(stringUrl, origin, options) {
   }
 
   const url = new URL(stringUrl);
-  if (!origin) {
-    origin = url.origin;
-  }
+  origin = origin || url;
 
   /* eslint-disable no-console */
   console.info(
@@ -71,6 +62,7 @@ async function crawl(stringUrl, origin, options) {
   extractImages(dom, origin, options);
 }
 
+/** Verify options and then begin crawl */
 module.exports = function setup(url, options) {
   if (!fs.existsSync(options.outputDir)) {
     /* eslint-disable no-console */
@@ -85,7 +77,4 @@ module.exports = function setup(url, options) {
   }
 
   crawl(url, undefined, options);
-
-  /* eslint-disable no-console */
-  console.info(chalk`{green \u2714} {gray Crawl completed}`);
 };
