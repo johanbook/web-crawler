@@ -2,7 +2,7 @@ jest.mock("uuid", () => ({
   v4: () => "uuid",
 }));
 
-const utils = require("./utils");
+import * as utils from "./utils";
 
 describe("utils", () => {
   it("generates file name", () => {

@@ -1,19 +1,25 @@
-const chalk = require("chalk");
-const fetch = require("node-fetch");
-const fs = require("fs");
-const path = require("path");
-const { v4: uuid } = require("uuid");
+import chalk from "chalk";
+import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
+import { v4 as uuid } from "uuid";
 
-function createImageName(url) {
-  let extension = path.extname(url);
+import Options from "./CrawlOptions";
+
+export function createImageName(url: string): string {
+  const extension = path.extname(url);
   return uuid() + extension;
 }
 
-async function fetchAndSaveImage(url, options) {
-  const resp = await fetch(url).catch(() => {});
-  if (!resp.ok) {
+export async function fetchAndSaveImage(
+  url: URL,
+  options: Options
+): Promise<void> {
+  const resp = await fetch(url).catch(() => {
     /* eslint-disable-next-line no-console */
     console.error(chalk.red(`Failed to download ${url}`));
+  });
+  if (!resp.ok) {
     return;
   }
 
@@ -26,6 +32,3 @@ async function fetchAndSaveImage(url, options) {
   );
   fs.writeFileSync(`${options.outputDir}/${name}`, buffer);
 }
-
-exports.createImageName = createImageName;
-exports.fetchAndSaveImage = fetchAndSaveImage;

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const crawl = require("./crawl");
-const { Command } = require("commander");
+import { Command } from "commander";
+
+import crawl from "./crawl";
 
 const program = new Command();
 program
